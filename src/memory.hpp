@@ -53,7 +53,7 @@ protected:
 	public:
 		enum { c = 0x01, o = 0x02, u = 0x04, ul = 0x08 };
 	protected:
-		char* _mem = nullptr;
+		void* _mem = nullptr;
 		size_t _length = 0, _pow = 0;
 		_chain* _next = nullptr, * _prev = nullptr;
 		char _flag = ul;
@@ -76,7 +76,6 @@ protected:
 		}
 
 		operator void* () const { return _mem; }
-		operator char* () const { return _mem; }
 		inline char flag() const { return _flag; }
 		inline auto max_length() const { return _pow; }
 		inline auto length() const { return _length; }
@@ -84,8 +83,11 @@ protected:
 		inline void* address() const { return _mem; }
 		inline _chain* next() const { return _next; }
 		inline void add_next(_chain* next) { _next = next; }
-		inline void disuse() { _flag = 0x0; _flag |= ul; }
-		inline auto reuse(
+		inline void disuse() { 
+			_flag = 0x0; _flag |= ul; 
+		}
+
+		bool reuse(
 			const size_t new_length,
 			const bool obj) {
 			if (ul & _flag) {
@@ -126,9 +128,7 @@ protected:
 			_chain* rs = nullptr;
 			if (!_c) {
 				_c = _new_chain(rsize, obj, nullptr);
-				//_c = new(_a->__alloc(sizeof(_chain))) _chain(_pow, _a, rsize, nullptr);
 				rs = _c;
-				//_length += rsize;
 			}
 			else {
 				rs = _c;
@@ -136,10 +136,8 @@ protected:
 					if (rs->is_free()) break;
 					if (!rs->next()) {
 						auto nc = _new_chain(rsize, obj, rs);
-						//	auto nc = new(_a->__alloc(sizeof(_chain))) _chain(_pow, _a, rsize, rs);
 						rs->add_next(nc);
 						rs = nc;
-						//	_length += _length;
 						break;
 					}
 					rs = rs->next();
