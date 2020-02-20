@@ -103,42 +103,42 @@ int main(int argc, char* argv[])
     //    });
     ////todo trielayer Õ¹¿ª 
     //a.clear();
-    auto a = allocater::instance(nullptr);
-    auto p = a->alloc(3).val();
-    memcpy(p, "12", 3);
-    std::cout << (char*)p.target();
-    a->free(p);
+    {
+        allocater a(nullptr);
+        auto p = a.alloc(3).val();
+        memcpy(p, "12", 3);
+        std::cout << (char*)p.target();
+        a.free(p);
 
-    p = a->alloc(3).val();
-    memcpy(p, "34", 3);
-    std::cout << (char*)p.target();
+        p = a.alloc(3).val();
+        memcpy(p, "34", 3);
+        std::cout << (char*)p.target();
 
-    auto p2 = a->alloc(3).val();
-    memcpy(p2, "56", 3);
-    std::cout << (char*)p2.target();
-    //union_ptr<std::vector<int>*, int*> a;
+        auto p2 = a.alloc(3).val();
+        memcpy(p2, "56", 3);
+        std::cout << (char*)p2.target();
+        //union_ptr<std::vector<int>*, int*> a;
 
-    auto p3 = a->alloc(sizeof("hello")).val();
-    memcpy(p3, "hello", sizeof("hello"));
-    std::cout << (char*)p3.target() << std::endl;
+        auto p3 = a.alloc(sizeof("hello")).val();
+        memcpy(p3, "hello", sizeof("hello"));
+        std::cout << (char*)p3.target() << std::endl;
 
 
-    struct test {
-        test(const int x, const int y) : k(x), b(y) {
-            std::cout << "test constructor\n";
-        }
-        ~test() {
-            std::cout << "test distructor\n";
-        }
-        int k = 0, b = 0;
-    };
-    const auto size = sizeof(test);
-    auto p4 = a->constructor<test>(2, 3).val();
-    std::cout << p4.target()->k << " " << p4.target()->b << std::endl;
-    a->destructor<test>(p4);
-    a->debug_check_chain();
-    allocater::release();
-
+        struct test {
+            test(const int x, const int y) : k(x), b(y) {
+                std::cout << "test constructor\n";
+            }
+            ~test() {
+                std::cout << "test distructor\n";
+            }
+            int k = 0, b = 0;
+        };
+        const auto size = sizeof(test);
+        auto p4 = a.constructor<test>(2, 3).val();
+        std::cout << p4.target()->k << " " << p4.target()->b << std::endl;
+        a.destructor<test>(p4);
+        a.debug_check_chain();
+    }
     getchar();
     return 0;
 }

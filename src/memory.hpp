@@ -1,5 +1,4 @@
 #include "__enigma.h"
-#include "singleton.h"
 #include "retval.hpp"
 #include <functional>
 #include <cassert>
@@ -31,6 +30,7 @@ public:
 		s._t = nullptr;
 		return *this;
 	}
+	operator bool() { return _t && _b; }
 	union_ptr& operator = (nullptr_t null) { _t = nullptr; _b = nullptr; return *this; }
 	inline void set_baseof(const based_pointer_type b) { _b = b; }
 	inline void set_target(const target_pointer_type t) { _t = t; }
@@ -44,8 +44,7 @@ protected:
 };
 
 
-class allocater : public singleton<allocater> {
-	friend singleton<allocater>;
+class allocater {
 public:
 	using ofm_func = std::function<void()>;
 protected:
@@ -167,6 +166,26 @@ public:
 	allocater(const allocater&) = delete;
 	allocater(allocater&&) = delete;
 	allocater& operator=(const allocater&) = delete;
+	allocater(
+		ofm_func ofm,
+		const size_t wl = 256) noexcept(false) {
+		_wl = wl < 256 ? 256 : wl, _cl = 0, _ofm = ofm;
+		auto index = (size_t)ceil(log2(wl));
+		_fls = new (__alloc(sizeof(_block*) * index)) _block * [index];
+		for (size_t i = 1; i <= index; i++)
+			_fls[i - 1] = static_cast<_block*>(new (__alloc(sizeof(_block))) _block(this, (size_t)pow(2, i)));
+		_mi = index;
+	}
+
+	~allocater() {
+		__enum_chain([&](_chain*& c) {
+			if (c->flag() & _chain::o) {
+				_chain_obj* co = (_chain_obj*)c;
+				SAFE_DEL(co);
+			}
+			else SAFE_DEL(c);
+			});
+	}
 
 	retval<union_ptr<void*, _chain*>> alloc(const size_t bytes) {
 		assert(bytes > 0);
@@ -245,26 +264,6 @@ public:
 #endif
 
 protected:
-	allocater(
-		ofm_func ofm,
-		const size_t wl = 256) noexcept(false) {
-		_wl = wl < 256 ? 256 : wl, _cl = 0, _ofm = ofm;
-		auto index = (size_t)ceil(log2(wl));
-		_fls = new (__alloc(sizeof(_block*) * index)) _block * [index];
-		for (size_t i = 1; i <= index; i++)
-			_fls[i - 1] = static_cast<_block*>(new (__alloc(sizeof(_block))) _block(this, (size_t)pow(2, i)));
-		_mi = index;
-	}
-	~allocater() {
-		__enum_chain([&](_chain*& c) {
-			if (c->flag() & _chain::o) {
-				_chain_obj* co = (_chain_obj*)c;
-				SAFE_DEL(co);
-			}
-			else SAFE_DEL(c);
-		});
-	}
-
 	void __enum_chain(std::function<void(_chain*&)> cb) {
 		if (!_fls) return;
 		for (size_t i = 0; i < _mi; i++) {
@@ -297,5 +296,11 @@ protected:
 		}
 		return p;
 	}
+};
+
+template<typename _Ty>
+struct allocater_ptr : public union_ptr<_Ty, allocater::_chain*>{
+	using type = union_ptr<_Ty, allocater::_chain*>;
+	using union_ptr<_Ty, allocater::_chain*>::union_ptr;
 };
 __ENIGMA_END__
