@@ -7,6 +7,12 @@
     <Filter Include="tester">
       <UniqueIdentifier>{0ace8c3d-9890-4f3d-a44d-123151c8eb57}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\container">
+      <UniqueIdentifier>{cf522650-fd9e-40b6-a940-0cf69cd54077}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\device">
+      <UniqueIdentifier>{4ed85073-3dbd-4e6f-96d9-3bd6a9eeaf60}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\__enigma.h">
@@ -25,6 +31,21 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\src\os.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\log.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\container\squeue.hpp">
+      <Filter>src\container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\container\asqueue.hpp">
+      <Filter>src\container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\container\list.hpp">
+      <Filter>src\container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ememory.hpp">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

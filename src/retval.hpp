@@ -1,8 +1,36 @@
 #pragma once
 #include <functional>
+#include <tuple>
+#include <utility>
 #include "__enigma.h"
+#include <iostream>
+#include <optional>
 
 __ENIGMA_BEGIN__
+
+template<class ..._tuple_arg>
+class result {
+	using xtuple = std::tuple<_tuple_arg...>;
+public:
+	result(xtuple&& t) : _t(t) {}
+
+
+public:
+	xtuple _t;
+	const char* _e = nullptr;
+};
+
+template<class _void> 
+struct result<_void> {
+	enum { check_type = std::is_same<void, _void>::value };
+	template<class ..._args>
+	static std::tuple<_args...>&& make(_args&& ...arg) {
+		return std::move(std::tuple<_args...>(std::forward<_args>(arg)...));
+	}
+};
+
+using resule_void = result<void>;
+
 template<typename _Ty>
 class retval {
 public:
@@ -37,4 +65,5 @@ public:
 	using retval<bool>::retval;
 	bool is_success() { return r; }
 };
+
 __ENIGMA_END__
