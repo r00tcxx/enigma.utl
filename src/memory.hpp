@@ -12,6 +12,7 @@ protected:
 		__block* prev = nullptr;
 		__block* next = nullptr;
 		__block* destructor = nullptr;
+		char flag = 0;
 		size_t size = 0;
 		char* mem = nullptr;
 
@@ -52,6 +53,29 @@ public:
 		}
 		_max_index = index;
 	}
+	
+	~allocator() {
+		auto clear_blocks = [this](__block* b) {
+			if (!b)return;
+			auto head = b;
+			auto cur = b->next;
+			while (cur) {
+				auto next = cur->next;
+				__dealloc(cur);
+				cur = next;
+				if (cur == head) break;
+			}
+			__dealloc(head);
+		};
+
+		for (size_t i = 0; i < _max_index; i++) {
+			if (_bl[i])
+				clear_blocks(_bl[i]);
+			if (_fbl[i])
+				clear_blocks(_fbl[i]);
+		}
+		_fbl = nullptr, _bl = nullptr;
+	}
 
 	void* alloc(const size_t size) {
 		assert(size != 0);
@@ -88,6 +112,7 @@ public:
 		//catch destruct
 		__block* desblock = __balloc(sizeof(std::function<void()>));
 		auto desfun =  new (desblock->mem) std::function<void()>(nullptr);
+		desblock->flag = 0x01;
 		*desfun = [obj] { obj->~type(); };
 		b->destructor = desblock;
 		return obj;
@@ -130,13 +155,29 @@ protected:
 		return p;
 	}
 
+	void __dealloc(__block* b) {
+		if (!b) return;
+		if (0x01 == b->flag)	//when 0x01 == flag, this block used for obj destructor,
+			return;				//can not free before obj.
+		if (b->destructor) {
+			auto des = (std::function<void()>*)b->destructor->mem;
+			(*des)();
+			b->destructor->flag = 0x02; //skip line 161 check, now can be free.
+			__dealloc(b->destructor);
+		}
+		__unuse_block(b, false);
+		const size_t power = (size_t)::pow(2, ceil(log2(b->size)));
+		operator delete[](b, power + sizeof(__block));
+		b = nullptr;
+	}
+
 	void* __get_block(
 		const size_t rsize,
 		const size_t pow) {
 		__block* fb = _fbl[pow - 1];
 		__block*& ub = _bl[pow - 1];
 		if (!fb) {
-			auto nb = __new_block(rsize);
+			auto nb = __new_block(rsize, pow);
 			nb->link(!ub ? nb : ub->prev, !ub ? nb : ub);
 			ub = !ub ? nb : ub; 
 			return nb->mem;
@@ -152,8 +193,9 @@ protected:
 	}
 
 	__block* __new_block(
-		const size_t rsize) {
-		auto p = __alloc(sizeof(__block) + rsize);
+		const size_t rsize,
+		const size_t index) {
+		auto p = __alloc(sizeof(__block) + (size_t)::pow(2, index));
 		assert(p);
 		auto block = new (p) __block;
 		block->mem = (char*)((size_t)&block->mem + sizeof(block->mem));
@@ -161,20 +203,25 @@ protected:
 		return block;
 	}
 
-	void __unuse_block(__block* b) {
+	void __unuse_block(
+		__block* b,
+		const bool add2free = true) {
 		const size_t pow = (size_t)ceil(log2(b->size));
-		b->destructor = nullptr;
 		memset(b->mem, 0, b->size);
 		if (b->is_head()) {
 			_bl[pow - 1] = nullptr;
 		}
-		else b->unlink();
-		auto& fb = _fbl[pow - 1];
-		if (!fb) {
-			b->link(b, b);
-			fb = b;
+		else 
+			b->unlink();
+		if (add2free) {
+			b->destructor = nullptr;
+			auto& fb = _fbl[pow - 1];
+			if (!fb) {
+				b->link(b, b);
+				fb = b;
+			}
+			else b->link(fb->prev, fb);
 		}
-		else b->link(fb->prev, fb);
 	}
 
 protected:

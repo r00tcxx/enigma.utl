@@ -61,20 +61,35 @@ int main(int argc, char* argv[])
 		int k = 0;
 		int c = 1;
 	};
-	const size_t n = sizeof(std::function<void()>);
-	allocator a;
-	auto p = a.alloc(8);
-	//a.free(p, 8);
-	auto p2 = a.alloc(8);
-	auto p3 = a.alloc(8);
-	a.free(p3, 8);
-	a.free(p2, 8);
+	
+	class cobj {
+	public:
+		cobj(const float p):point(p)  { std::cout << "class construct" << std::endl; }
+		~cobj() { std::cout << "class destruct" << std::endl; }
+		void fun() { std::cout << "hello" << std::endl; }
 
-	auto o = a.construct<obj>(1, 2);
-	std::cout << o->k << "-" << o->c << std::endl;
-	a.destruct<obj>(o);
-	o = a.construct<obj>(3, 4);
-	a.destruct<obj>(o);
+		float point = 0;
+	};
+
+	const size_t n = sizeof(std::function<void()>);
+	{
+		allocator a;
+		auto p = a.alloc(4);
+		a.free(p, 8);
+		auto p2 = a.alloc(4);
+		auto p3 = a.alloc(4);
+		a.free(p3, 4);
+		a.free(p2, 4);
+
+		auto o = a.construct<obj>(1, 2);
+		a.destruct<obj>(o);
+		o = a.construct<obj>(3, 4);
+
+		auto c = a.construct<cobj>(2.2f);
+		c->fun();
+		std::cout << c->point << std::endl;
+		a.destruct<cobj>(c);
+	}
 
 	//auto res = fun();
 	//if (res.check([&](decltype(res)::const_type_ref i)->bool { return i == 3; }))
