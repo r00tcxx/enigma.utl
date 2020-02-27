@@ -6,6 +6,7 @@
 #include "memory.hpp"
 #include "allocator.hpp"
 #include <vector>
+#include <list>
 
 using namespace enigma;
 
@@ -90,11 +91,13 @@ int main(int argc, char* argv[])
 	//	std::cout << c->point << std::endl;
 	//	a.destruct<cobj>(c);
 	//}
-
-	std::vector<int/*, std_allocator<int>*/> vec;
-	vec.push_back(1);
+	std::list<int> l;
+	std::vector<int&/*, std_allocator<int>*/> vec;
+	int k = 1;
+	vec.push_back(k);
 
 	std::cout << *vec.begin();
+	l.p
 
 	//auto res = fun();
 	//if (res.check([&](decltype(res)::const_type_ref i)->bool { return i == 3; }))
