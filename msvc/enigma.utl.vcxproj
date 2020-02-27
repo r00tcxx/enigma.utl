@@ -158,6 +158,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\allocator.hpp" />
     <ClInclude Include="..\src\channel.hpp" />
     <ClInclude Include="..\src\container\asqueue.hpp" />
     <ClInclude Include="..\src\container\list.hpp" />

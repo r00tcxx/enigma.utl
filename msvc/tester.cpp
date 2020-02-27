@@ -4,6 +4,7 @@
 #include "trietree.hpp"
 #include "container/squeue.hpp"
 #include "memory.hpp"
+#include "allocator.hpp"
 #include <vector>
 
 using namespace enigma;
@@ -70,26 +71,30 @@ int main(int argc, char* argv[])
 
 		float point = 0;
 	};
-
 	const size_t n = sizeof(std::function<void()>);
-	{
-		allocator a;
-		auto p = a.alloc(4);
-		a.free(p, 8);
-		auto p2 = a.alloc(4);
-		auto p3 = a.alloc(4);
-		a.free(p3, 4);
-		a.free(p2, 4);
+	//{
+	//	allocator a;
+	//	auto p = a.alloc(4);
+	//	a.free(p, 8);
+	//	auto p2 = a.alloc(4);
+	//	auto p3 = a.alloc(4);
+	//	a.free(p3, 4);
+	//	a.free(p2, 4);
 
-		auto o = a.construct<obj>(1, 2);
-		a.destruct<obj>(o);
-		o = a.construct<obj>(3, 4);
+	//	auto o = a.construct<obj>(1, 2);
+	//	a.destruct<obj>(o);
+	//	o = a.construct<obj>(3, 4);
 
-		auto c = a.construct<cobj>(2.2f);
-		c->fun();
-		std::cout << c->point << std::endl;
-		a.destruct<cobj>(c);
-	}
+	//	auto c = a.construct<cobj>(2.2f);
+	//	c->fun();
+	//	std::cout << c->point << std::endl;
+	//	a.destruct<cobj>(c);
+	//}
+
+	std::vector<int/*, std_allocator<int>*/> vec;
+	vec.push_back(1);
+
+	std::cout << *vec.begin();
 
 	//auto res = fun();
 	//if (res.check([&](decltype(res)::const_type_ref i)->bool { return i == 3; }))

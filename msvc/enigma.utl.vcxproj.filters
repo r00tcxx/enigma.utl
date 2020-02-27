@@ -48,6 +48,9 @@
     <ClInclude Include="..\src\ememory.hpp">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\allocator.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="tester.cpp">

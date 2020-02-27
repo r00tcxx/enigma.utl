@@ -59,7 +59,7 @@ public:
 			if (!b)return;
 			auto head = b;
 			auto cur = b->next;
-			while (cur) {
+			while (cur && cur->next != cur) {
 				auto next = cur->next;
 				__dealloc(cur);
 				cur = next;
