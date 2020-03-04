@@ -109,6 +109,7 @@ public:
 		auto p = __get_block(size, pow);
 		type* obj = new(p) type(std::forward<_Args>(args)...);
 		__block* b = reinterpret_cast<__block*>((size_t)p - sizeof(__block));
+
 		//catch destruct
 		__block* desblock = __balloc(sizeof(std::function<void()>));
 		auto desfun =  new (desblock->mem) std::function<void()>(nullptr);
@@ -211,8 +212,11 @@ protected:
 		if (b->is_head()) {
 			_bl[pow - 1] = nullptr;
 		}
-		else 
+		else {
+			if (_bl[pow - 1] == b) 
+				_bl[pow - 1] = b->next;
 			b->unlink();
+		}
 		if (add2free) {
 			b->destructor = nullptr;
 			auto& fb = _fbl[pow - 1];

@@ -173,6 +173,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\memory.hpp" />
+    <ClCompile Include="..\src\test\list_test.cpp" />
     <ClCompile Include="tester.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
